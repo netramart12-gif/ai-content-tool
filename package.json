@@ -1,0 +1,28 @@
+{
+  "name": "viral-content-studio",
+  "version": "1.0.0",
+  "description": "AI-powered viral content generator for social media - Netlify serverless deployment",
+  "main": "index.html",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'Ready for deployment'",
+    "test": "echo 'No tests configured'"
+  },
+  "keywords": [
+    "ai",
+    "content-creation",
+    "viral",
+    "social-media",
+    "bangladesh",
+    "anthropic",
+    "netlify"
+  ],
+  "author": "Mahabub",
+  "license": "MIT",
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}

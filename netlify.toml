@@ -1,0 +1,35 @@
+[build]
+# Build command
+command = "echo 'No build step needed - static site with serverless functions'"
+# Directory to publish
+publish = "."
+
+[functions]
+# Serverless function directory
+directory = "netlify/functions"
+# Node.js version
+node_buildver = "18"
+
+# Redirect all non-file requests to index.html for SPA-like behavior
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+
+# Redirect routes that should be handled by the function
+[[redirects]]
+from = "/.netlify/functions/generate"
+to = "/.netlify/functions/generate"
+status = 200
+
+# Environment variables setup (add via Netlify UI or CLI)
+# ANTHROPIC_API_KEY should be set in Netlify dashboard
+
+# Custom headers for better security and CORS
+[[headers]]
+for = "/*"
+[headers.values]
+  X-Content-Type-Options = "nosniff"
+  X-Frame-Options = "SAMEORIGIN"
+  X-XSS-Protection = "1; mode=block"
+  Referrer-Policy = "strict-origin-when-cross-origin"

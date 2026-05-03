@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Viral Content Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0b0c10;
+  --bg2:#13141a;
+  --bg3:#1a1b24;
+  --accent:#ff6b35;
+  --accent2:#ffd166;
+  --green:#06d6a0;
+  --blue:#4cc9f0;
+  --pink:#f72585;
+  --purple:#7209b7;
+  --border:#ffffff12;
+  --text:#f0f0f0;
+  --muted:#888;
+  --card:#16171f;
+}
+body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* NOISE OVERLAY */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4;}
+
+/* TOP GLOW */
+body::after{content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:400px;background:radial-gradient(ellipse,#ff6b3520 0%,transparent 70%);pointer-events:none;z-index:0;}
+
+.wrapper{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:2rem 1.25rem 4rem;}
+
+/* HEADER */
+.hdr{text-align:center;margin-bottom:2.5rem;animation:fadeUp .6s ease both;}
+.hdr-eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:.75rem;}
+.hdr h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.4rem,6vw,4rem);letter-spacing:2px;line-height:1;color:#fff;}
+.hdr h1 span{color:var(--accent);}
+.hdr p{font-size:14px;color:var(--muted);margin-top:.75rem;max-width:480px;margin-inline:auto;line-height:1.6;}
+
+/* STEP TABS */
+.steps{display:flex;gap:0;margin-bottom:2rem;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:5px;animation:fadeUp .6s .1s ease both;overflow:hidden;}
+.step-tab{flex:1;padding:9px 8px;text-align:center;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;border-radius:10px;transition:all .2s;letter-spacing:.3px;}
+.step-tab.active{background:var(--accent);color:#fff;}
+.step-tab .snum{display:block;font-family:'Bebas Neue',sans-serif;font-size:18px;line-height:1;color:inherit;margin-bottom:2px;}
+
+/* STEP PANELS */
+.step-panel{display:none;animation:fadeUp .3s ease both;}
+.step-panel.active{display:block;}
+
+/* SECTION CARD */
+.sc{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.25rem;margin-bottom:1rem;}
+.sc-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:.75rem;}
+
+/* TOPIC CATEGORIES */
+.cat-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;}
+.cat-btn{font-size:11px;font-weight:700;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .18s;letter-spacing:.3px;}
+.cat-btn:hover{border-color:var(--accent);color:var(--accent);}
+.cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.cat-btn[data-cat="ai"]{--c:#4cc9f0;}
+.cat-btn[data-cat="social"]{--c:#f72585;}
+.cat-btn[data-cat="income"]{--c:#06d6a0;}
+.cat-btn[data-cat="automation"]{--c:#7209b7;}
+.cat-btn[data-cat="tools"]{--c:#ffd166;}
+.cat-btn.active{background:var(--c,var(--accent));border-color:var(--c,var(--accent));color:#fff;}
+
+/* TOPIC CARDS */
+.topics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:520px){.topics-grid{grid-template-columns:1fr;}}
+.topic-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px 14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.topic-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s;}
+.topic-card:hover{border-color:var(--tc,var(--accent));transform:translateY(-2px);}
+.topic-card:hover::before{opacity:1;}
+.topic-card.selected{border-color:var(--tc,var(--accent));background:var(--tc,var(--accent))1a;}
+.topic-card .tc-icon{font-size:20px;margin-bottom:6px;}
+.topic-card .tc-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;line-height:1.3;}
+.topic-card .tc-why{font-size:11px;color:var(--muted);line-height:1.4;}
+.topic-card .tc-hot{position:absolute;top:8px;right:8px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.5px;}
+.hot-fire{background:#ff6b3520;color:#ff6b35;border:1px solid #ff6b3540;}
+.hot-new{background:#4cc9f020;color:#4cc9f0;border:1px solid #4cc9f040;}
+.hot-trend{background:#f7258520;color:#f72585;border:1px solid #f7258540;}
+
+/* CUSTOM TOPIC */
+.custom-row{display:flex;gap:8px;margin-top:1rem;}
+.custom-inp{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:#fff;font-family:'Nunito',sans-serif;font-size:13px;outline:none;transition:border .2s;}
+.custom-inp::placeholder{color:var(--muted);}
+.custom-inp:focus{border-color:var(--accent);}
+.use-btn{background:var(--accent);border:none;border-radius:10px;padding:10px 18px;color:#fff;font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;transition:opacity .2s;}
+.use-btn:hover{opacity:.85;}
+
+/* SELECTED TOPIC DISPLAY */
+.selected-topic-bar{display:none;background:linear-gradient(135deg,#ff6b3515,#ffd16610);border:1px solid #ff6b3530;border-radius:12px;padding:12px 16px;margin-bottom:1rem;align-items:center;gap:10px;}
+.selected-topic-bar.show{display:flex;}
+.stb-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+.stb-title{font-size:14px;font-weight:800;color:var(--accent);flex:1;}
+.stb-change{font-size:11px;color:var(--muted);cursor:pointer;text-decoration:underline;}
+
+/* FORMAT / PLATFORM SELECTS */
+.opt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;}
+@media(max-width:480px){.opt-grid{grid-template-columns:1fr 1fr;}}
+.opt-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;transition:all .18s;text-align:center;}
+.opt-card:hover{border-color:var(--accent);}
+.opt-card.selected{border-color:var(--accent);background:#ff6b3515;}
+.opt-card .oc-icon{font-size:22px;margin-bottom:5px;}
+.opt-card .oc-name{font-size:12px;font-weight:700;color:#fff;}
+.opt-card .oc-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* PLATFORM PILLS */
+.plat-row{display:flex;flex-wrap:wrap;gap:7px;}
+.plat-pill{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);cursor:pointer;transition:all .18s;font-size:12px;font-weight:700;color:var(--muted);}
+.plat-pill:hover{border-color:var(--accent);}
+.plat-pill.selected{border-color:var(--accent);background:#ff6b3515;color:var(--accent);}
+.plat-pill .pi{font-size:16px;}
+
+/* SETTINGS ROW */
+.settings-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:.75rem;}
+@media(max-width:480px){.settings-row{grid-template-columns:1fr 1fr;}}
+.setting-group label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:700;display:block;margin-bottom:5px;}
+.setting-group select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:#fff;font-family:'Nunito',sans-serif;font-size:12px;outline:none;transition:border .2s;-webkit-appearance:none;cursor:pointer;}
+.setting-group select:focus{border-color:var(--accent);}
+
+/* HOOK CHIPS */
+.hook-chips{display:flex;flex-wrap:wrap;gap:7px;}
+.hchip{font-size:11px;font-weight:700;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .18s;font-family:'Nunito',sans-serif;}
+.hchip:hover{border-color:var(--green);color:var(--green);}
+.hchip.active{background:var(--green);border-color:var(--green);color:#000;}
+
+/* CAPTION INPUT */
+.cap-area{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:#fff;font-family:'Nunito',sans-serif;font-size:13px;resize:vertical;min-height:80px;outline:none;transition:border .2s;line-height:1.6;}
+.cap-area::placeholder{color:var(--muted);}
+.cap-area:focus{border-color:var(--accent);}
+
+/* GENERATE BTN */
+.gen-btn{width:100%;padding:16px;background:var(--accent);border:none;border-radius:14px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;margin-top:1.25rem;transition:all .2s;position:relative;overflow:hidden;}
+.gen-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,#ffffff20,transparent);transform:translateX(-100%);transition:transform .5s;}
+.gen-btn:hover::before{transform:translateX(100%);}
+.gen-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px #ff6b3540;}
+.gen-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.gen-spinner{width:20px;height:20px;border:2px solid #ffffff40;border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* NAV BTNS */
+.nav-row{display:flex;gap:10px;margin-top:1.25rem;}
+.nav-btn{flex:1;padding:12px;border-radius:12px;font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .18s;}
+.nav-prev{background:var(--bg3);border:1px solid var(--border);color:var(--muted);}
+.nav-prev:hover{border-color:var(--border);color:#fff;}
+.nav-next{background:var(--accent);border:none;color:#fff;}
+.nav-next:hover{opacity:.9;}
+.nav-next:disabled{opacity:.4;cursor:not-allowed;}
+
+/* PROGRESS STEPS */
+.prog-bar{display:flex;align-items:center;gap:0;margin-bottom:1.5rem;animation:fadeUp .5s ease both;}
+.prog-step{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.prog-step.done .ps-dot{background:var(--green);border-color:var(--green);}
+.prog-step.active .ps-dot{background:var(--accent);border-color:var(--accent);}
+.ps-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;transition:all .3s;flex-shrink:0;}
+.prog-line{flex:1;height:1px;background:var(--border);margin:0 8px;}
+.prog-step.done .prog-line{background:var(--green);}
+
+/* OUTPUT AREA */
+.output-area{animation:fadeUp .4s ease both;}
+.out-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;}
+.out-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:#fff;}
+.out-title span{color:var(--accent);}
+.out-actions{display:flex;gap:8px;}
+.out-act-btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;font-family:'Nunito',sans-serif;}
+.btn-copy-all{background:var(--accent);border:none;color:#fff;}
+.btn-copy-all:hover{opacity:.85;}
+.btn-regen{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-regen:hover{border-color:var(--accent);color:var(--accent);}
+
+/* OUTPUT SECTIONS */
+.out-sections{display:flex;flex-direction:column;gap:10px;}
+.out-sec{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s;}
+.out-sec:hover{border-color:#ffffff20;}
+.out-sec-head{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none;}
+.osh-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.osh-title{font-size:13px;font-weight:700;color:#fff;flex:1;}
+.osh-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.5px;}
+.osh-actions{display:flex;gap:6px;align-items:center;}
+.osh-copy{font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;}
+.osh-copy:hover{border-color:var(--green);color:var(--green);}
+.osh-copy.ok{border-color:var(--green);color:var(--green);}
+.osh-chevron{transition:transform .2s;color:var(--muted);}
+.out-sec.collapsed .osh-chevron{transform:rotate(-90deg);}
+.out-sec-body{padding:14px 16px;border-top:1px solid var(--border);font-size:13px;line-height:1.8;color:#ccc;white-space:pre-wrap;}
+.out-sec.collapsed .out-sec-body{display:none;}
+.tag-cloud{display:flex;flex-wrap:wrap;gap:6px;}
+.tag-pill{font-size:11px;padding:4px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);}
+
+/* LOADING STATE */
+.loading-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center;display:none;}
+.loading-box.show{display:block;}
+.loading-dots{display:flex;gap:6px;justify-content:center;margin-bottom:1rem;}
+.loading-dots span{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:bounce .8s ease infinite;}
+.loading-dots span:nth-child(2){animation-delay:.15s;background:var(--accent2);}
+.loading-dots span:nth-child(3){animation-delay:.3s;background:var(--green);}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.loading-label{font-size:14px;color:var(--muted);font-weight:600;}
+.loading-bar{height:3px;background:var(--bg3);border-radius:2px;margin-top:1rem;overflow:hidden;}
+.loading-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;width:0%;transition:width .4s ease;}
+
+/* ERROR */
+.err-box{background:#ff414115;border:1px solid #ff414130;border-radius:12px;padding:12px 16px;color:#ff8080;font-size:13px;margin-top:.75rem;display:none;}
+.err-box.show{display:block;}
+
+/* EMPTY STATE */
+.empty-hint{text-align:center;padding:2rem;color:var(--muted);font-size:13px;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#ffffff15;border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-eyebrow">🔥 AI-Powered Studio</div>
+    <h1>Viral Content <span>Studio</span></h1>
+    <p>AI tools, platform updates, automation tips — সব কিছুর জন্য viral content এখন এক জায়গায়।</p>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div class="prog-bar" id="progBar">
+    <div class="prog-step active" id="ps1">
+      <div class="ps-dot" id="pd1">1</div>
+      <span>Topic</span>
+    </div>
+    <div class="prog-line" id="pl1"></div>
+    <div class="prog-step" id="ps2">
+      <div class="ps-dot" id="pd2">2</div>
+      <span>Format</span>
+    </div>
+    <div class="prog-line" id="pl2"></div>
+    <div class="prog-step" id="ps3">
+      <div class="ps-dot" id="pd3">3</div>
+      <span>Settings</span>
+    </div>
+    <div class="prog-line" id="pl3"></div>
+    <div class="prog-step" id="ps4">
+      <div class="ps-dot" id="pd4">4</div>
+      <span>Generate</span>
+    </div>
+  </div>
+
+  <!-- ===== STEP 1: TOPIC ===== -->
+  <div class="step-panel active" id="step1">
+    <div class="sc">
+      <div class="sc-label">Category Filter</div>
+      <div class="cat-row" id="catRow">
+        <button class="cat-btn active" data-cat="all">All Topics</button>
+        <button class="cat-btn" data-cat="ai">🤖 AI Tools</button>
+        <button class="cat-btn" data-cat="social">📱 Social Media</button>
+        <button class="cat-btn" data-cat="income">💰 Online Income</button>
+        <button class="cat-btn" data-cat="automation">⚡ Automation</button>
+        <button class="cat-btn" data-cat="tools">🛠️ Free Tools</button>
+      </div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">Trending Topics — <span style="color:var(--accent)">Select one to continue</span></div>
+      <div class="topics-grid" id="topicsGrid"></div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">Custom Topic</div>
+      <div class="custom-row">
+        <input class="custom-inp" id="customTopic" placeholder="নিজের topic লিখুন... e.g. ChatGPT-এ নতুন কী এলো?"/>
+        <button class="use-btn" onclick="useCustomTopic()">Use This ↗</button>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn nav-next" id="step1Next" onclick="goStep(2)" disabled>Next: Format →</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 2: FORMAT + PLATFORM ===== -->
+  <div class="step-panel" id="step2">
+    <div class="selected-topic-bar show" id="stBar">
+      <div>
+        <div class="stb-label">Selected Topic</div>
+        <div class="stb-title" id="stbTitle">—</div>
+      </div>
+      <span class="stb-change" onclick="goStep(1)">Change</span>
+    </div>
+    <div class="sc">
+      <div class="sc-label">Content Format</div>
+      <div class="opt-grid" id="formatGrid">
+        <div class="opt-card selected" data-fmt="Reel/Shorts Script" onclick="selectOpt(this,'fmt')">
+          <div class="oc-icon">🎬</div>
+          <div class="oc-name">Reel Script</div>
+          <div class="oc-sub">30–90 sec video</div>
+        </div>
+        <div class="opt-card" data-fmt="Carousel" onclick="selectOpt(this,'fmt')">
+          <div class="oc-icon">🎠</div>
+          <div class="oc-name">Carousel</div>
+          <div class="oc-sub">Slide by slide</div>
+        </div>
+        <div class="opt-card" data-fmt="Text Screenshot" onclick="selectOpt(this,'fmt')">
+          <div class="oc-icon">📸</div>
+          <div class="oc-name">Screenshot Post</div>
+          <div class="oc-sub">Viral text image</div>
+        </div>
+        <div class="opt-card" data-fmt="LinkedIn Post" onclick="selectOpt(this,'fmt')">
+          <div class="oc-icon">💼</div>
+          <div class="oc-name">LinkedIn Post</div>
+          <div class="oc-sub">Professional</div>
+        </div>
+        <div class="opt-card" data-fmt="YouTube Thumbnail" onclick="selectOpt(this,'fmt')">
+          <div class="oc-icon">▶️</div>
+          <div class="oc-name">YT Thumbnail</div>
+          <div class="oc-sub">Click-bait visual</div>
+        </div>
+        <div class="opt-card" data-fmt="Image Prompt" onclick="selectOpt(this,'fmt')">
+          <div class="oc-icon">🎨</div>
+          <div class="oc-name">Image Prompt</div>
+          <div class="oc-sub">AI image gen</div>
+        </div>
+      </div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">Platform</div>
+      <div class="plat-row" id="platRow">
+        <div class="plat-pill selected" data-plat="Facebook" onclick="togglePlat(this)"><span class="pi">📘</span> Facebook</div>
+        <div class="plat-pill selected" data-plat="Instagram" onclick="togglePlat(this)"><span class="pi">📸</span> Instagram</div>
+        <div class="plat-pill" data-plat="YouTube" onclick="togglePlat(this)"><span class="pi">▶️</span> YouTube</div>
+        <div class="plat-pill" data-plat="LinkedIn" onclick="togglePlat(this)"><span class="pi">💼</span> LinkedIn</div>
+        <div class="plat-pill" data-plat="TikTok" onclick="togglePlat(this)"><span class="pi">🎵</span> TikTok</div>
+        <div class="plat-pill" data-plat="Twitter/X" onclick="togglePlat(this)"><span class="pi">✖️</span> Twitter/X</div>
+        <div class="plat-pill" data-plat="Pinterest" onclick="togglePlat(this)"><span class="pi">📌</span> Pinterest</div>
+        <div class="plat-pill" data-plat="Threads" onclick="togglePlat(this)"><span class="pi">🧵</span> Threads</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn nav-prev" onclick="goStep(1)">← Back</button>
+      <button class="nav-btn nav-next" onclick="goStep(3)">Next: Settings →</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 3: SETTINGS ===== -->
+  <div class="step-panel" id="step3">
+    <div class="sc">
+      <div class="sc-label">Output Settings</div>
+      <div class="settings-row">
+        <div class="setting-group">
+          <label>Language Style</label>
+          <select id="langStyle">
+            <option value="Bangla + English mix">Bangla + English Mix</option>
+            <option value="Full Bangla">Full Bangla</option>
+            <option value="Full English">Full English</option>
+          </select>
+        </div>
+        <div class="setting-group">
+          <label>Video Duration</label>
+          <select id="duration">
+            <option value="30 seconds">30 sec</option>
+            <option value="60 seconds" selected>60 sec</option>
+            <option value="90 seconds">90 sec</option>
+          </select>
+        </div>
+        <div class="setting-group">
+          <label>Target Audience</label>
+          <select id="audience">
+            <option value="Bangladeshi freelancers and digital marketers">BD Freelancers</option>
+            <option value="Small business owners in Bangladesh">BD Business Owners</option>
+            <option value="Students learning digital marketing">Students</option>
+            <option value="General Bangladeshi social media users">General Users</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">Hook Style</div>
+      <div class="hook-chips" id="hookChips">
+        <button class="hchip active" data-h="Latest Update">🆕 Latest Update</button>
+        <button class="hchip" data-h="Hidden Feature">🔒 Hidden Feature</button>
+        <button class="hchip" data-h="Mistake Alert">⚠️ Mistake Alert</button>
+        <button class="hchip" data-h="Secret Tool">🔑 Secret Tool</button>
+        <button class="hchip" data-h="Income Idea">💸 Income Idea</button>
+        <button class="hchip" data-h="Before vs After">↔️ Before vs After</button>
+        <button class="hchip" data-h="Productivity Hack">⚡ Productivity Hack</button>
+        <button class="hchip" data-h="Step-by-Step Tutorial">📋 Step-by-Step</button>
+      </div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">Your Caption (Optional)</div>
+      <textarea class="cap-area" id="captionInp" placeholder="নিজের caption দিলে সেটা rewrite করব। না দিলে fresh caption generate হবে..."></textarea>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn nav-prev" onclick="goStep(2)">← Back</button>
+      <button class="nav-btn nav-next" onclick="goStep(4)">Review & Generate →</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 4: GENERATE ===== -->
+  <div class="step-panel" id="step4">
+    <div class="sc" id="reviewCard">
+      <div class="sc-label">Review Your Selections</div>
+      <div id="reviewContent" style="font-size:13px;line-height:2;color:#ccc;"></div>
+    </div>
+    <div class="err-box" id="errBox"></div>
+    <button class="gen-btn" id="genBtn" onclick="generateContent()">
+      <span id="genBtnIcon">⚡</span>
+      <span id="genBtnText">Generate Full Content Pack</span>
+      <div class="gen-spinner" id="genSpinner"></div>
+    </button>
+
+    <!-- LOADING -->
+    <div class="loading-box" id="loadingBox">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+      <div class="loading-label" id="loadLabel">AI চিন্তা করছে...</div>
+      <div class="loading-bar"><div class="loading-fill" id="loadFill"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- GLOBAL OUTPUT ZONE — appears below entire form after generation -->
+<div id="globalOutputZone" style="display:none;max-width:900px;margin:0 auto;padding:0 1.25rem 4rem;position:relative;z-index:1;"></div>
+
+<script>
+// ---- DATA ----
+const TOPICS = [
+  {id:'t1',cat:'ai',icon:'🤖',title:'ChatGPT-এর নতুন Memory Feature — এখন সব মনে রাখে!',why:'Latest AI update — FOMO hook',hot:'🔥 FIRE',hclass:'hot-fire',color:'#4cc9f0'},
+  {id:'t2',cat:'social',icon:'📱',title:'Instagram Algorithm 2026 — কী বদলে গেল?',why:'প্রতি মাসে লাখ লাখ view পাওয়া topic',hot:'📈 TREND',hclass:'hot-trend',color:'#f72585'},
+  {id:'t3',cat:'income',icon:'💸',title:'Faceless YouTube Channel — মুখ না দেখিয়ে মাসে ৫০k+',why:'Income idea content সবচেয়ে বেশি share হয়',hot:'🔥 FIRE',hclass:'hot-fire',color:'#06d6a0'},
+  {id:'t4',cat:'automation',icon:'⚡',title:'n8n দিয়ে ৫টি কাজ Automate করো — ঘুমের মধ্যেও চলে!',why:'Automation = curiosity + productivity',hot:'🆕 NEW',hclass:'hot-new',color:'#7209b7'},
+  {id:'t5',cat:'ai',icon:'🎨',title:'Canva AI Magic Studio — ৩ মিনিটে Professional Design',why:'Canva update news always goes viral',hot:'🆕 NEW',hclass:'hot-new',color:'#ffd166'},
+  {id:'t6',cat:'social',icon:'📘',title:'Facebook Reels-এ Views কম? এই ৩টা ভুল করছো তুমি',why:'Mistake-based content সবচেয়ে বেশি save হয়',hot:'📈 TREND',hclass:'hot-trend',color:'#4cc9f0'},
+  {id:'t7',cat:'tools',icon:'🆓',title:'৫টি Free AI Tool যা Freelancing বদলে দেবে 2026-এ',why:'Free tools = highest share + save rate',hot:'🔥 FIRE',hclass:'hot-fire',color:'#06d6a0'},
+  {id:'t8',cat:'automation',icon:'🔗',title:'Make.com দিয়ে WhatsApp Auto-Reply Setup — Step by Step',why:'WhatsApp automation = massive demand in BD',hot:'🆕 NEW',hclass:'hot-new',color:'#ff6b35'},
+  {id:'t9',cat:'social',icon:'▶️',title:'YouTube SEO 2026 — এই ৪টা করলে Views আসবেই',why:'SEO + YouTube = evergreen viral combo',hot:'📈 TREND',hclass:'hot-trend',color:'#f72585'},
+  {id:'t10',cat:'income',icon:'🏪',title:'Shopify Dropshipping শুরু করো ০ টাকায় — পূর্ণ গাইড',why:'Ecommerce income idea = বিশাল audience',hot:'🔥 FIRE',hclass:'hot-fire',color:'#ffd166'},
+  {id:'t11',cat:'ai',icon:'🧠',title:'Claude AI vs ChatGPT — কোনটা বেশি ভালো 2026-এ?',why:'Comparison content = debate + high engagement',hot:'🆕 NEW',hclass:'hot-new',color:'#7209b7'},
+  {id:'t12',cat:'tools',icon:'📊',title:'Google Analytics 4 সেটআপ — শুরু থেকে শেষ বাংলায়',why:'GA4 দরকার সবার — tutorial always wins',hot:'📈 TREND',hclass:'hot-trend',color:'#4cc9f0'},
+];
+
+let selectedTopic = null;
+let selectedFmt = 'Reel/Shorts Script';
+let selectedPlats = ['Facebook','Instagram'];
+let selectedHook = 'Latest Update';
+let currentStep = 1;
+let fullText = '';
+
+// ---- RENDER TOPICS ----
+function renderTopics(filter='all'){
+  const grid = document.getElementById('topicsGrid');
+  const filtered = filter==='all' ? TOPICS : TOPICS.filter(t=>t.cat===filter);
+  grid.innerHTML = filtered.map(t=>`
+    <div class="topic-card ${selectedTopic&&selectedTopic.id===t.id?'selected':''}" data-id="${t.id}" style="--tc:${t.color}" onclick="selectTopic('${t.id}')">
+      <div class="tc-hot ${t.hclass}">${t.hot}</div>
+      <div class="tc-icon">${t.icon}</div>
+      <div class="tc-title">${t.title}</div>
+      <div class="tc-why">${t.why}</div>
+    </div>
+  `).join('');
+}
+
+function selectTopic(id){
+  selectedTopic = TOPICS.find(t=>t.id===id);
+  document.querySelectorAll('.topic-card').forEach(c=>c.classList.toggle('selected',c.dataset.id===id));
+  document.getElementById('step1Next').disabled = false;
+}
+
+function useCustomTopic(){
+  const val = document.getElementById('customTopic').value.trim();
+  if(!val) return;
+  selectedTopic = {id:'custom',cat:'custom',icon:'✍️',title:val,why:'Custom topic'};
+  document.getElementById('step1Next').disabled = false;
+  document.getElementById('customTopic').style.borderColor='var(--green)';
+}
+
+// Cat filter
+document.getElementById('catRow').addEventListener('click',e=>{
+  const btn = e.target.closest('.cat-btn');
+  if(!btn) return;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTopics(btn.dataset.cat);
+});
+
+// ---- FORMAT ----
+function selectOpt(el, type){
+  el.closest('.sc').querySelectorAll('.opt-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  if(type==='fmt') selectedFmt = el.dataset.fmt;
+}
+
+// ---- PLATFORM ----
+function togglePlat(el){
+  el.classList.toggle('selected');
+  selectedPlats = [...document.querySelectorAll('.plat-pill.selected')].map(p=>p.dataset.plat);
+}
+
+// ---- HOOK ----
+document.getElementById('hookChips').addEventListener('click',e=>{
+  const c = e.target.closest('.hchip');
+  if(!c) return;
+  document.querySelectorAll('.hchip').forEach(h=>h.classList.remove('active'));
+  c.classList.add('active');
+  selectedHook = c.dataset.h;
+});
+
+// ---- STEP NAV ----
+function goStep(n){
+  if(n===2 && !selectedTopic){ alert('Please select a topic first!'); return; }
+  currentStep = n;
+  document.querySelectorAll('.step-panel').forEach((p,i)=>p.classList.toggle('active',i===n-1));
+  updateProgBar();
+  if(n===2) document.getElementById('stbTitle').textContent = selectedTopic.title;
+  if(n===4) buildReview();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateProgBar(){
+  [1,2,3,4].forEach(i=>{
+    document.getElementById('ps'+i).classList.toggle('done', i<currentStep);
+    document.getElementById('ps'+i).classList.toggle('active', i===currentStep);
+    if(i<4) document.getElementById('pl'+i).style.background = i<currentStep ? 'var(--green)' : 'var(--border)';
+  });
+}
+
+function buildReview(){
+  const plats = selectedPlats.length ? selectedPlats.join(', ') : 'None selected';
+  const lang = document.getElementById('langStyle').value;
+  const dur = document.getElementById('duration').value;
+  const aud = document.getElementById('audience').value;
+  document.getElementById('reviewContent').innerHTML = `
+    <div>📌 <b style="color:#fff">Topic:</b> ${selectedTopic.title}</div>
+    <div>🎬 <b style="color:#fff">Format:</b> ${selectedFmt}</div>
+    <div>📱 <b style="color:#fff">Platforms:</b> ${plats}</div>
+    <div>🌐 <b style="color:#fff">Language:</b> ${lang}</div>
+    <div>⏱️ <b style="color:#fff">Duration:</b> ${dur}</div>
+    <div>👥 <b style="color:#fff">Audience:</b> ${aud}</div>
+    <div>🎯 <b style="color:#fff">Hook Style:</b> ${selectedHook}</div>
+  `;
+}
+
+// ---- GENERATE ----
+async function generateContent(){
+  const topic = selectedTopic.title;
+  const fmt = selectedFmt;
+  const plats = selectedPlats.join(', ') || 'Facebook, Instagram';
+  const lang = document.getElementById('langStyle').value;
+  const dur = document.getElementById('duration').value;
+  const aud = document.getElementById('audience').value;
+  const capInp = document.getElementById('captionInp').value.trim();
+  const capInstruction = capInp
+    ? `User-provided caption to REWRITE more virally:\n"${capInp}"`
+    : 'Generate a fresh caption from scratch.';
+
+  hideErr();
+  const btn = document.getElementById('genBtn');
+  const sp = document.getElementById('genSpinner');
+  const bt = document.getElementById('genBtnText');
+  const bi = document.getElementById('genBtnIcon');
+  const lb = document.getElementById('loadingBox');
+
+  btn.disabled=true; sp.style.display='block'; bt.textContent='Generating...'; bi.style.display='none';
+  lb.classList.add('show');
+
+  // Hide previous output
+  const outZone = document.getElementById('globalOutputZone');
+  outZone.style.display='none';
+  outZone.innerHTML='';
+
+  setLoad(10,'AI content strategist হিসেবে চিন্তা করছি...');
+
+  try {
+    setLoad(30,'Sending to backend...');
+    
+    // Call Netlify serverless function instead of direct API
+    const response = await fetch('/.netlify/functions/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        topic,
+        fmt,
+        plats,
+        lang,
+        dur,
+        aud,
+        selectedHook,
+        capInstruction
+      })
+    });
+
+    setLoad(70,'Formatting content...');
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || `Backend error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    fullText = data.content;
+    
+    setLoad(92,'Rendering output...');
+    renderGlobalOutput(fullText);
+    setLoad(100,'Done! 🎉');
+    setTimeout(()=>lb.classList.remove('show'),600);
+
+  } catch(e){
+    lb.classList.remove('show');
+    showErr('Error: '+e.message+'. Please try again.');
+    console.error('Generation error:', e);
+  } finally {
+    btn.disabled=false; sp.style.display='none'; bt.textContent='🔄 Regenerate Pack'; bi.style.display='none';
+  }
+}
+
+function setLoad(pct,label){
+  document.getElementById('loadFill').style.width=pct+'%';
+  document.getElementById('loadLabel').textContent=label;
+}
+
+function showErr(m){ const e=document.getElementById('errBox'); e.textContent=m; e.classList.add('show'); }
+function hideErr(){ document.getElementById('errBox').classList.remove('show'); }
+
+// ---- RENDER GLOBAL OUTPUT ----
+const FIXED_SECS = [
+  {marker:'IMAGE_PROMPT', name:'Image Prompt', badge:'IMAGE',   bc:'#f72585', bg:'#f7258512', border:'#f7258530', icon:'🖼️', isTag:false},
+  {marker:'VIDEO_PROMPT', name:'Video Prompt', badge:'VIDEO',   bc:'#7209b7', bg:'#7209b712', border:'#7209b730', icon:'🎥', isTag:false},
+  {marker:'HOOK',         name:'Hook',         badge:'HOOK',    bc:'#ff6b35', bg:'#ff6b3512', border:'#ff6b3530', icon:'🎯', isTag:false},
+  {marker:'CAPTION',      name:'Caption',      badge:'CAPTION', bc:'#06d6a0', bg:'#06d6a012', border:'#06d6a030', icon:'📣', isTag:false},
+  {marker:'DESCRIPTION',  name:'Description',  badge:'DESC',    bc:'#4cc9f0', bg:'#4cc9f012', border:'#4cc9f030', icon:'📝', isTag:false},
+  {marker:'HASHTAGS',     name:'Hashtags',     badge:'TAGS',    bc:'#ffd166', bg:'#ffd16612', border:'#ffd16630', icon:'#️⃣', isTag:true},
+];
+
+function extractSection(raw, marker, nextMarkers){
+  var parts = raw.split(/###([A-Z_]+)###/);
+  for(var i = 1; i < parts.length; i += 2){
+    if(parts[i].toUpperCase() === marker.toUpperCase()){
+      return (parts[i+1] || '').replace(/^[\s\r\n:\-]+/, '').trim();
+    }
+  }
+  return '';
+}
+
+function renderGlobalOutput(raw){
+  const zone = document.getElementById('globalOutputZone');
+  zone.innerHTML = '';
+
+  // Header row
+  const hdr = document.createElement('div');
+  hdr.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-top:.5rem;';
+  hdr.innerHTML=`
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1.5px;color:#fff;">
+      Content Pack <span style="color:var(--accent)">Ready ⚡</span>
+    </div>
+    <button class="out-act-btn btn-copy-all" onclick="copyAll()">Copy All</button>`;
+  zone.appendChild(hdr);
+
+  // Divider line
+  const divEl = document.createElement('div');
+  divEl.style.cssText='height:1px;background:var(--border);margin-bottom:1rem;';
+  zone.appendChild(divEl);
+
+  // Sections container
+  const container = document.createElement('div');
+  container.className='out-sections';
+  zone.appendChild(container);
+
+  FIXED_SECS.forEach((def, i)=>{
+    const nextMarkers = FIXED_SECS.slice(i+1).map(d=>d.marker);
+    const content = extractSection(raw, def.marker, nextMarkers);
+    container.appendChild(buildOutSec(def.icon, def.name, def.bg, def.border, def.badge, def.bc, content, def.isTag));
+  });
+
+  zone.style.display='block';
+
+  // Smooth scroll to output
+  setTimeout(()=>{ zone.scrollIntoView({behavior:'smooth', block:'start'}); }, 150);
+}
+
+function buildOutSec(icon,name,bg,border,badge,bc,content,isTag){
+  const sec = document.createElement('div');
+  sec.className='out-sec';
+  sec.style.cssText=`background:${bg};border-color:${border};`;
+
+  const head = document.createElement('div');
+  head.className='out-sec-head';
+  head.innerHTML=`
+    <div class="osh-icon" style="background:${bc}20;font-size:18px;">${icon}</div>
+    <div class="osh-title">${name}</div>
+    <div class="osh-actions">
+      <span class="osh-badge" style="background:${bc}20;color:${bc};border:1px solid ${bc}40;">${badge}</span>
+      <button class="osh-copy">Copy</button>
+      <svg class="osh-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>`;
+
+  const body = document.createElement('div');
+  body.className='out-sec-body';
+
+  if(!content || content.length < 3){
+    body.innerHTML = '<span style="color:#666;font-style:italic;font-size:12px;">⏳ This section is still being generated. Please wait...</span>';
+  } else if(isTag){
+    const tags = content.split(/[\s\n]+/).filter(t=>t.startsWith('#'));
+    if(tags.length>0){
+      body.innerHTML='<div class="tag-cloud">'+tags.map(t=>'<span class="tag-pill">'+t+'</span>').join('')+'</div>';
+    } else {
+      body.textContent = content;
+    }
+  } else {
+    body.textContent = content;
+  }
+
+  head.addEventListener('click',e=>{
+    if(!e.target.closest('.osh-copy')) sec.classList.toggle('collapsed');
+  });
+  head.querySelector('.osh-copy').addEventListener('click',e=>{
+    e.stopPropagation();
+    navigator.clipboard.writeText(content).then(()=>{
+      const b=e.target; b.textContent='Copied!'; b.classList.add('ok');
+      setTimeout(()=>{ b.textContent='Copy'; b.classList.remove('ok'); },1800);
+    });
+  });
+
+  sec.appendChild(head);
+  sec.appendChild(body);
+  return sec;
+}
+
+function copyAll(){
+  navigator.clipboard.writeText(fullText).then(()=>{
+    const btn = document.querySelector('.btn-copy-all');
+    if(btn){ btn.textContent='Copied!'; setTimeout(()=>btn.textContent='Copy All',1800); }
+  });
+}
+
+// ---- INIT ----
+renderTopics();
+updateProgBar();
+</script>
+</body>
+</html>
