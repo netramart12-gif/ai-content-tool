@@ -1,4 +1,3 @@
-
 export async function handler(event) {
   return {
     statusCode: 200,
@@ -6,32 +5,24 @@ export async function handler(event) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      success: true,
       content: `
 ###IMAGE_PROMPT###
-Test image prompt working.
+A professional viral AI content design, dark modern background, glowing digital elements, high quality.
 
 ###VIDEO_PROMPT###
-Test video prompt working.
+Create a 60-second short video explaining the selected topic in a clear, viral, Bangla-English style.
 
 ###HOOK###
-Hook Line 1: Test hook one
-Hook Line 2: Test hook two
-Hook Line 3: Test hook three
+আপনি কি জানেন এই টুলটা আপনার কাজ ১০ গুণ সহজ করে দিতে পারে?
 
 ###CAPTION###
-Test caption working.
+AI tools এখন শুধু trend না, smart কাজ করার সবচেয়ে বড় shortcut. আজ থেকেই ব্যবহার শুরু করুন।
 
 ###DESCRIPTION###
-Test description working.
+এই content pack তৈরি করা হয়েছে social media post, reel, caption এবং hashtag এর জন্য। এটি Facebook এবং Instagram এর জন্য optimized.
 
 ###HASHTAGS###
-#AI
-#DigitalMarketing
-#Freelancer
-#Bangladesh
-#OnlineIncome
-#Automation
+#AI #DigitalMarketing #Bangladesh #Freelancing #ContentCreation #Automation
 `
     })
   };
